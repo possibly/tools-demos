@@ -54,70 +54,84 @@ layout: demo
         }
 
 
-        /* Wave collision animation - two waves from opposite directions */
+        /* Complex wave interference from four corners */
         .wave-button.animating {
-            animation: waveCollision 1.5s ease-out;
+            animation: multiWaveInterference 2s ease-out;
         }
         
         .wave-button.animating::before {
-            animation: wave1 1.5s ease-out;
+            animation: cornerWaves1 2s ease-out;
         }
         
         .wave-button.animating::after {
-            animation: wave2 1.5s ease-out;
+            animation: cornerWaves2 2s ease-out;
         }
 
-        @keyframes waveCollision {
+        @keyframes multiWaveInterference {
             0% { 
                 border-radius: 50px;
-                transform: scale(1);
             }
-            15% { 
-                border-radius: 30px 70px 50px 50px;
-                transform: scale(1.02);
+            8% { 
+                border-radius: 20px 80px 50px 50px;
             }
-            30% { 
-                border-radius: 50px 50px 30px 70px;
-                transform: scale(1.04);
+            16% { 
+                border-radius: 50px 20px 80px 50px;
             }
-            45% { 
-                border-radius: 70px 30px 70px 30px;
-                transform: scale(1.06);
+            24% { 
+                border-radius: 50px 50px 20px 80px;
             }
-            60% { 
-                border-radius: 25px 75px 25px 75px;
-                transform: scale(1.08);
+            32% { 
+                border-radius: 80px 50px 50px 20px;
             }
-            75% { 
-                border-radius: 60px 40px 60px 40px;
-                transform: scale(1.04);
+            40% { 
+                border-radius: 15px 85px 30px 70px;
             }
-            90% { 
-                border-radius: 45px 55px 45px 55px;
-                transform: scale(1.02);
+            48% { 
+                border-radius: 70px 15px 85px 30px;
+            }
+            56% { 
+                border-radius: 30px 70px 15px 85px;
+            }
+            64% { 
+                border-radius: 85px 30px 70px 15px;
+            }
+            72% { 
+                border-radius: 10px 90px 25px 75px;
+            }
+            80% { 
+                border-radius: 75px 10px 90px 25px;
+            }
+            88% { 
+                border-radius: 25px 75px 10px 90px;
+            }
+            94% { 
+                border-radius: 35px 65px 35px 65px;
             }
             100% { 
                 border-radius: 50px;
-                transform: scale(1);
             }
         }
         
-        @keyframes wave1 {
-            0% { opacity: 0; transform: scale(0.8) translateX(-20px); }
-            20% { opacity: 0.8; transform: scale(1.1) translateX(0px); }
-            40% { opacity: 0.6; transform: scale(1.3) translateX(10px); }
-            60% { opacity: 0.4; transform: scale(1.5) translateX(20px); }
-            80% { opacity: 0.2; transform: scale(1.7) translateX(15px); }
-            100% { opacity: 0; transform: scale(2) translateX(0px); }
+        @keyframes cornerWaves1 {
+            0% { opacity: 0; transform: scale(0.5) translate(-30px, -30px); }
+            12% { opacity: 0.9; transform: scale(0.8) translate(-15px, -15px); }
+            25% { opacity: 0.7; transform: scale(1.1) translate(5px, 5px); }
+            38% { opacity: 0.5; transform: scale(1.4) translate(15px, 15px); }
+            50% { opacity: 0.3; transform: scale(1.7) translate(10px, 10px); }
+            65% { opacity: 0.2; transform: scale(2.0) translate(0px, 0px); }
+            80% { opacity: 0.1; transform: scale(2.3) translate(-5px, -5px); }
+            100% { opacity: 0; transform: scale(2.6) translate(-10px, -10px); }
         }
         
-        @keyframes wave2 {
-            0% { opacity: 0; transform: scale(0.8) translateY(20px); }
-            25% { opacity: 0.7; transform: scale(1.1) translateY(0px); }
-            45% { opacity: 0.5; transform: scale(1.3) translateY(-10px); }
-            65% { opacity: 0.3; transform: scale(1.5) translateY(-20px); }
-            85% { opacity: 0.1; transform: scale(1.7) translateY(-15px); }
-            100% { opacity: 0; transform: scale(2) translateY(0px); }
+        @keyframes cornerWaves2 {
+            0% { opacity: 0; transform: scale(0.5) translate(30px, -30px); }
+            15% { opacity: 0.8; transform: scale(0.8) translate(15px, -15px); }
+            30% { opacity: 0.6; transform: scale(1.1) translate(-5px, 5px); }
+            45% { opacity: 0.4; transform: scale(1.4) translate(-15px, 15px); }
+            60% { opacity: 0.2; transform: scale(1.7) translate(-10px, 10px); }
+            75% { opacity: 0.1; transform: scale(2.0) translate(0px, 0px); }
+            90% { opacity: 0.05; transform: scale(2.3) translate(5px, -5px); }
+            100% { opacity: 0; transform: scale(2.6) translate(10px, -10px); }
         }
 
 
@@ -189,62 +203,96 @@ layout: demo
     </button>
 
     <div class="demo-info">
-        <h2>Wave Collision Animation</h2>
+        <h2>Four-Corner Wave Interference</h2>
         <p>
-            Click the button to see two waves colliding from different directions! 
-            Watch as one wave approaches horizontally while another comes vertically, 
-            creating interference patterns that deform the button's shape in all directions - 
-            demonstrating how wave superposition works in physics.
+            Click the button to see waves spawning from all four corners and colliding! 
+            Watch as multiple waves create complex interference patterns that ripple through 
+            the button's edges with many peaks and valleys, demonstrating advanced wave 
+            superposition and how waves naturally fizzle out after collision.
         </p>
     </div>
 
     <div class="chart-container">
-        <h3 class="chart-title">Wave Collision Visualization</h3>
-        <div class="phase-indicator" id="phaseIndicator">Phase 1: Horizontal Wave Approaching</div>
+        <h3 class="chart-title">Four-Corner Wave Interference Physics</h3>
+        <div class="phase-indicator" id="phaseIndicator">Wave Superposition: ψ_total = ψ₁ + ψ₂ + ψ₃ + ψ₄</div>
         <svg class="wave-chart" id="waveChart" viewBox="0 0 800 300">
             <!-- Grid lines -->
             <defs>
-                <pattern id="grid" width="40" height="30" patternUnits="userSpaceOnUse">
-                    <path d="M 40 0 L 0 0 0 30" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
                 </pattern>
+                <radialGradient id="waveGradient1" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" style="stop-color:#4facfe;stop-opacity:0.8"/>
+                    <stop offset="100%" style="stop-color:#4facfe;stop-opacity:0"/>
+                </radialGradient>
+                <radialGradient id="waveGradient2" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" style="stop-color:#00f2fe;stop-opacity:0.8"/>
+                    <stop offset="100%" style="stop-color:#00f2fe;stop-opacity:0"/>
+                </radialGradient>
+                <radialGradient id="waveGradient3" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" style="stop-color:#ff6b6b;stop-opacity:0.8"/>
+                    <stop offset="100%" style="stop-color:#ff6b6b;stop-opacity:0"/>
+                </radialGradient>
+                <radialGradient id="waveGradient4" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" style="stop-color:#ffd93d;stop-opacity:0.8"/>
+                    <stop offset="100%" style="stop-color:#ffd93d;stop-opacity:0"/>
+                </radialGradient>
             </defs>
             <rect width="100%" height="100%" fill="url(#grid)" />
             
-            <!-- Center target area -->
-            <rect x="350" y="100" width="100" height="100" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" rx="20"/>
-            <text x="400" y="155" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="12">Target</text>
+            <!-- Central interference zone -->
+            <rect x="300" y="100" width="200" height="100" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1" rx="10"/>
+            <text x="400" y="155" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="10">Interference Zone</text>
             
-            <!-- Horizontal Wave -->
-            <circle id="wave1" cx="100" cy="150" r="20" fill="none" stroke="#4facfe" stroke-width="4" opacity="0"/>
-            <circle id="wave1Ring" cx="100" cy="150" r="35" fill="none" stroke="#4facfe" stroke-width="2" opacity="0"/>
+            <!-- Four corner wave sources -->
+            <circle id="corner1" cx="100" cy="50" r="15" fill="url(#waveGradient1)" opacity="0"/>
+            <circle id="corner1Ring" cx="100" cy="50" r="30" fill="none" stroke="#4facfe" stroke-width="2" opacity="0"/>
             
-            <!-- Vertical Wave -->
-            <circle id="wave2" cx="400" cy="50" r="20" fill="none" stroke="#00f2fe" stroke-width="4" opacity="0"/>
-            <circle id="wave2Ring" cx="400" cy="50" r="35" fill="none" stroke="#00f2fe" stroke-width="2" opacity="0"/>
+            <circle id="corner2" cx="700" cy="50" r="15" fill="url(#waveGradient2)" opacity="0"/>
+            <circle id="corner2Ring" cx="700" cy="50" r="30" fill="none" stroke="#00f2fe" stroke-width="2" opacity="0"/>
             
-            <!-- Collision Effect -->
-            <circle id="collisionEffect" cx="400" cy="150" r="30" fill="none" stroke="#ffffff" stroke-width="5" opacity="0"/>
-            <circle id="collisionRing1" cx="400" cy="150" r="50" fill="none" stroke="#ffffff" stroke-width="2" opacity="0"/>
-            <circle id="collisionRing2" cx="400" cy="150" r="70" fill="none" stroke="#ffffff" stroke-width="1" opacity="0"/>
+            <circle id="corner3" cx="100" cy="250" r="15" fill="url(#waveGradient3)" opacity="0"/>
+            <circle id="corner3Ring" cx="100" cy="250" r="30" fill="none" stroke="#ff6b6b" stroke-width="2" opacity="0"/>
+            
+            <circle id="corner4" cx="700" cy="250" r="15" fill="url(#waveGradient4)" opacity="0"/>
+            <circle id="corner4Ring" cx="700" cy="250" r="30" fill="none" stroke="#ffd93d" stroke-width="2" opacity="0"/>
+            
+            <!-- Interference patterns -->
+            <circle id="interference1" cx="400" cy="150" r="40" fill="none" stroke="#ffffff" stroke-width="3" opacity="0"/>
+            <circle id="interference2" cx="400" cy="150" r="60" fill="none" stroke="#ffffff" stroke-width="2" opacity="0"/>
+            <circle id="interference3" cx="400" cy="150" r="80" fill="none" stroke="#ffffff" stroke-width="1" opacity="0"/>
         </svg>
         
         <div class="wave-labels">
-            <span>Horizontal Wave (left→right)</span>
-            <span>Vertical Wave (top→bottom)</span>
-            <span>Collision & Interference</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                <div style="font-size: 12px; color: #555;">
+                    <strong>Wave Equation:</strong> ψ(x,y,t) = A·sin(k·r - ωt + φ)<br>
+                    <strong>Superposition:</strong> Constructive + Destructive interference<br>
+                    <strong>Damping:</strong> Amplitude decreases as e^(-γt)
+                </div>
+                <div style="font-size: 11px; color: #777; text-align: right;">
+                    A = amplitude, k = wave number<br>
+                    ω = angular frequency, φ = phase<br>
+                    r = distance from source
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         const waveButton = document.getElementById('waveBtn');
         const phaseIndicator = document.getElementById('phaseIndicator');
-        const wave1 = document.getElementById('wave1');
-        const wave1Ring = document.getElementById('wave1Ring');
-        const wave2 = document.getElementById('wave2');
-        const wave2Ring = document.getElementById('wave2Ring');
-        const collisionEffect = document.getElementById('collisionEffect');
-        const collisionRing1 = document.getElementById('collisionRing1');
-        const collisionRing2 = document.getElementById('collisionRing2');
+        const corner1 = document.getElementById('corner1');
+        const corner1Ring = document.getElementById('corner1Ring');
+        const corner2 = document.getElementById('corner2');
+        const corner2Ring = document.getElementById('corner2Ring');
+        const corner3 = document.getElementById('corner3');
+        const corner3Ring = document.getElementById('corner3Ring');
+        const corner4 = document.getElementById('corner4');
+        const corner4Ring = document.getElementById('corner4Ring');
+        const interference1 = document.getElementById('interference1');
+        const interference2 = document.getElementById('interference2');
+        const interference3 = document.getElementById('interference3');
 
         // Button wave animation
         waveButton.addEventListener('click', function() {
@@ -253,7 +301,7 @@ layout: demo
             this.classList.add('animating');
             setTimeout(() => {
                 this.classList.remove('animating');
-            }, 1500);
+            }, 2000);
         });
 
         waveButton.addEventListener('keydown', function(e) {
@@ -263,110 +311,75 @@ layout: demo
             }
         });
 
-        // Wave movement functions
-        function moveHorizontalWave(progress) {
-            const startX = 100;
-            const endX = 400;
-            const currentX = startX + (endX - startX) * progress;
-            wave1.setAttribute('cx', currentX);
-            wave1Ring.setAttribute('cx', currentX);
+        // Four-corner wave physics functions
+        function animateCornerWave(corner, ring, progress, delay = 0) {
+            const adjustedProgress = Math.max(0, progress - delay);
+            const amplitude = Math.sin(adjustedProgress * Math.PI);
+            const opacity = amplitude * (1 - adjustedProgress * 0.3);
             
-            // Fade in as it approaches
-            const opacity = Math.min(1, progress * 2);
-            wave1.style.opacity = opacity;
-            wave1Ring.style.opacity = opacity * 0.5;
+            corner.style.opacity = Math.max(0, opacity);
+            ring.style.opacity = Math.max(0, opacity * 0.6);
+            
+            // Expand wave rings
+            const baseRadius = 15;
+            const ringRadius = 30 + adjustedProgress * 60;
+            ring.setAttribute('r', ringRadius);
         }
 
-        function moveVerticalWave(progress) {
-            const startY = 50;
-            const endY = 150;
-            const currentY = startY + (endY - startY) * progress;
-            wave2.setAttribute('cy', currentY);
-            wave2Ring.setAttribute('cy', currentY);
+        function showInterferencePattern(progress) {
+            // Complex interference with multiple frequency components
+            const freq1 = Math.sin(progress * Math.PI * 4) * 0.5 + 0.5;
+            const freq2 = Math.sin(progress * Math.PI * 6 + Math.PI/3) * 0.3 + 0.3;
+            const freq3 = Math.sin(progress * Math.PI * 8 + Math.PI/2) * 0.2 + 0.2;
             
-            // Fade in as it approaches
-            const opacity = Math.min(1, progress * 2);
-            wave2.style.opacity = opacity;
-            wave2Ring.style.opacity = opacity * 0.5;
+            const damping = Math.exp(-progress * 2); // Exponential decay
+            
+            interference1.style.opacity = freq1 * damping;
+            interference2.style.opacity = freq2 * damping;
+            interference3.style.opacity = freq3 * damping;
+            
+            // Dynamic scaling for wave propagation
+            interference1.setAttribute('r', 40 + progress * 30);
+            interference2.setAttribute('r', 60 + progress * 40);
+            interference3.setAttribute('r', 80 + progress * 50);
         }
 
-        function showCollisionEffect(intensity) {
-            const opacity = intensity;
-            collisionEffect.style.opacity = opacity;
-            collisionRing1.style.opacity = opacity * 0.7;
-            collisionRing2.style.opacity = opacity * 0.4;
-            
-            // Scale collision rings based on intensity
-            const scale1 = 1 + intensity * 0.5;
-            const scale2 = 1 + intensity * 0.8;
-            collisionRing1.setAttribute('r', 50 * scale1);
-            collisionRing2.setAttribute('r', 70 * scale2);
+        function updatePhaseDisplay(progress) {
+            const phase = Math.floor(progress * 4);
+            const equations = [
+                "Wave Initiation: ψ₁,₂,₃,₄ = A·sin(ωt)",
+                "Propagation: ψ(r,t) = A·sin(k·r - ωt)",
+                "Superposition: ψ_total = Σψᵢ",
+                "Damping: ψ → ψ·e^(-γt)"
+            ];
+            phaseIndicator.textContent = equations[phase] || equations[3];
         }
 
-        // Animation phases
-        const phases = [
-            {
-                name: "Phase 1: Horizontal Wave Approaching",
-                action: (progress) => {
-                    moveHorizontalWave(Math.min(1, progress * 2));
-                    moveVerticalWave(0);
-                    showCollisionEffect(0);
-                }
-            },
-            {
-                name: "Phase 2: Vertical Wave Approaching",
-                action: (progress) => {
-                    moveHorizontalWave(1);
-                    moveVerticalWave(Math.min(1, progress * 2));
-                    showCollisionEffect(0);
-                }
-            },
-            {
-                name: "Phase 3: Waves Colliding",
-                action: (progress) => {
-                    moveHorizontalWave(1);
-                    moveVerticalWave(1);
-                    showCollisionEffect(Math.sin(progress * Math.PI));
-                }
-            },
-            {
-                name: "Phase 4: Interference Pattern",
-                action: (progress) => {
-                    moveHorizontalWave(1);
-                    moveVerticalWave(1);
-                    const pulseIntensity = Math.sin(progress * Math.PI * 3) * 0.5 + 0.5;
-                    showCollisionEffect(pulseIntensity);
-                }
-            }
-        ];
-
-        let currentPhase = 0;
-        let phaseProgress = 0;
+        // Continuous wave physics animation
         let animationTime = 0;
 
-        // Auto-animation loop
-        function animateWaves() {
-            // Update phase progress
-            phaseProgress = (animationTime % 3000) / 3000; // 3 second cycles
+        function animateWavePhysics() {
+            const cycleTime = 4000; // 4 second cycles
+            const progress = (animationTime % cycleTime) / cycleTime;
             
-            // Execute current phase animation
-            phases[currentPhase].action(phaseProgress);
+            // Animate all four corner waves with slight delays
+            animateCornerWave(corner1, corner1Ring, progress, 0);
+            animateCornerWave(corner2, corner2Ring, progress, 0.1);
+            animateCornerWave(corner3, corner3Ring, progress, 0.05);
+            animateCornerWave(corner4, corner4Ring, progress, 0.15);
+            
+            // Show complex interference pattern
+            showInterferencePattern(progress);
+            
+            // Update educational display
+            updatePhaseDisplay(progress);
             
             // Update animation time
             animationTime += 50; // 50ms increments
             
-            requestAnimationFrame(animateWaves);
+            requestAnimationFrame(animateWavePhysics);
         }
 
-        // Phase cycling every 3 seconds
-        function cyclePhases() {
-            phaseIndicator.textContent = phases[currentPhase].name;
-            currentPhase = (currentPhase + 1) % phases.length;
-            animationTime = 0; // Reset phase progress
-        }
-
-        // Start animations
-        animateWaves();
-        cyclePhases();
-        setInterval(cyclePhases, 3000);
+        // Start continuous physics animation
+        animateWavePhysics();
     </script>
