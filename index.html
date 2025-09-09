@@ -1,0 +1,27 @@
+---
+layout: default
+title: Tools Demos
+---
+
+<h1>Tools and Demos</h1>
+<p class="muted">Grouped by category. Add HTML files in <code>demos/</code> with YAML front matter (<code>title</code>, <code>category</code>, optional <code>description</code>).</p>
+
+{% assign demos = site.pages | where_exp: "p", "p.path contains 'demos/'" | where_exp: "p", "p.title" %}
+{% if demos and demos.size > 0 %}
+  {% assign groups = demos | group_by: "category" | sort: "name" %}
+  {% for g in groups %}
+    <section class="category">
+      <h2>{{ g.name }}</h2>
+      <ul class="post-list">
+        {% for d in g.items %}
+          <li>
+            <a class="post-link" href="{{ d.url | relative_url }}">{{ d.title }}</a>
+            {% if d.description %}<span class="muted"> — {{ d.description }}</span>{% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endfor %}
+{% else %}
+  <p class="muted">No demos yet. Create files in <code>demos/</code> like <code>demos/my-demo.html</code> with front matter for listing.</p>
+{% endif %}

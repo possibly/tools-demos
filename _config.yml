@@ -1,0 +1,15 @@
+title: "Tools Demos"
+author: "Tyler Brother"
+description: "A minimal GitHub Pages site grouping tools and demos by category."
+url: ""
+baseurl: ""
+markdown: kramdown
+
+# Treat pages in `demos/` as demo entries with clean URLs
+defaults:
+  - scope:
+      path: "demos"
+      type: "pages"
+    values:
+      layout: demo
+      permalink: "/demos/:basename/"

@@ -1,0 +1,306 @@
+---
+title: "Wave Interference: Ripple + Superposition"
+category: "visuals"
+description: "Click-ripple diffraction effect and an animated SVG chart showing wave superposition."
+---
+
+<style>
+  /* Layout helpers */
+  .center {
+    display: grid; place-items: center; min-height: 38vh; margin-bottom: 1rem;
+  }
+  .section-title { margin: .5rem 0; }
+  .muted { color: var(--muted, #6b7280); }
+
+  /* Button + ripple effect */
+  .cta {
+    position: relative; overflow: hidden;
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 160px; min-height: 56px; padding: .75rem 1.25rem;
+    border: 1px solid var(--border, #e5e7eb); border-radius: 999px;
+    background: #111827; color: #fff; font-weight: 600; letter-spacing: .3px;
+    cursor: pointer; user-select: none; box-shadow: 0 6px 20px rgba(0,0,0,.12);
+  }
+  .cta:active { transform: translateY(1px); }
+  .ripple {
+    position: absolute; inset: 0; pointer-events: none; isolation: isolate;
+  }
+  /* Two phased fields that create a quick interference look */
+  .field {
+    position: absolute; width: 160vmax; height: 160vmax; left: 50%; top: 50%;
+    transform: translate(-50%, -50%) scale(.2); opacity: .45;
+    mix-blend-mode: screen; filter: blur(.3px);
+    background: repeating-radial-gradient(circle at var(--cx, 52%) var(--cy, 50%),
+                 rgba(59,130,246,.9) 0 2px, transparent 2px 8px);
+    border-radius: 50%;
+    animation: field-out .95s ease-out forwards;
+  }
+  .field.b {
+    opacity: .42; --cx: 48%; --cy: 50%;
+    background: repeating-radial-gradient(circle at var(--cx) var(--cy),
+                 rgba(239,68,68,.9) 0 2px, transparent 2px 8px);
+    animation-delay: 15ms;
+  }
+  @keyframes field-out {
+    0%   { transform: translate(-50%, -50%) scale(.2);   opacity: .5; }
+    60%  { transform: translate(-50%, -50%) scale(1.8);  opacity: .35; }
+    100% { transform: translate(-50%, -50%) scale(3.2);  opacity: 0; }
+  }
+
+  /* Chart styles */
+  .controls { display: flex; gap: .5rem; align-items: center; margin: .5rem 0 1rem; flex-wrap: wrap; }
+  .btn { appearance: none; border: 1px solid var(--border, #e5e7eb); padding: .5rem .75rem; border-radius: 6px; background: white; cursor: pointer; }
+  .btn-primary { background: #2563eb; color: white; border-color: #2563eb; }
+  .btn:disabled { opacity: .6; cursor: not-allowed; }
+  .legend { color: var(--muted, #6b7280); font-size: .9rem; margin-left: .25rem; }
+  .figure { width: 100%; max-width: 760px; margin: 0 auto; }
+  svg { width: 100%; height: auto; background: #ffffff; border: 1px solid var(--border, #e5e7eb); border-radius: 8px; }
+  .axis { stroke: #94a3b8; stroke-width: 1; }
+  .grid { stroke: #e5e7eb; stroke-width: 1; }
+  .wave { fill: none; stroke-width: 2.5; }
+  .wave.a { stroke: #ef4444; }
+  .wave.b { stroke: #3b82f6; }
+  .wave.sum { stroke: #10b981; stroke-width: 3; }
+  .hidden { opacity: 0; }
+  .reveal { opacity: 1; transition: opacity 0.5s ease; }
+  .dashdraw { stroke-dasharray: 1400; stroke-dashoffset: 1400; transition: stroke-dashoffset 0.9s ease; }
+  .dashdraw.drawn { stroke-dashoffset: 0; }
+  .label { font-size: 12px; fill: #374151; }
+  .math { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; background: #f8fafc; border: 1px solid var(--border, #e5e7eb); padding: .5rem .75rem; border-radius: 6px; display: inline-block; }
+  .probe-line { stroke: #111827; stroke-opacity: .2; stroke-width: 2; }
+  .marker { stroke: #fff; stroke-width: 1.5; }
+  .marker.a { fill: #ef4444; }
+  .marker.b { fill: #3b82f6; }
+  .marker.sum { fill: #10b981; }
+  .stack.a { stroke: #ef4444; stroke-width: 3; stroke-linecap: round; }
+  .stack.b { stroke: #3b82f6; stroke-width: 3; stroke-linecap: round; }
+  .hint { color: var(--muted, #6b7280); font-size: .85rem; }
+</style>
+
+<section class="center">
+  <button id="rippleBtn" class="cta" aria-label="Click to produce wave interference feedback">
+    Click Me
+    <!-- container for ephemeral ripples -->
+    <span class="ripple" aria-hidden="true"></span>
+  </button>
+</section>
+<p class="muted">A quick diffraction/interference ripple appears as responsive feedback when you click.</p>
+
+<h2 class="section-title">Animated Chart: Wave Superposition</h2>
+<div class="controls">
+  <button id="next" class="btn btn-primary">Next step</button>
+  <button id="reset" class="btn">Reset</button>
+  <label style="display:flex;align-items:center;gap:.35rem;">
+    <input type="checkbox" id="guide" /> Show combine guide
+  </label>
+  <span id="stepLabel" class="legend">Step 0/4 — Setup</span>
+</div>
+
+<div class="figure">
+  <svg id="scene" viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Wave interference demo">
+    <!-- Plot area -->
+    <rect x="50" y="40" width="620" height="300" fill="#ffffff" />
+
+    <!-- Grid -->
+    <g id="grid" class="hidden">
+      <path class="grid" d="M50 190 H670"/>
+      <path class="grid" d="M50 100 H670"/>
+      <path class="grid" d="M50 280 H670"/>
+    </g>
+
+    <!-- Axes -->
+    <g id="axes" class="hidden">
+      <path class="axis" d="M50 190 H670"/>
+      <path class="axis" d="M50 40 V340"/>
+      <text class="label" x="675" y="195">x</text>
+      <text class="label" x="38" y="50">y</text>
+    </g>
+
+    <!-- Waves -->
+    <path id="waveA" class="wave a dashdraw hidden" d="M 50 190 L 670 190" />
+    <path id="waveB" class="wave b dashdraw hidden" d="M 50 190 L 670 190" />
+    <path id="waveSum" class="wave sum dashdraw hidden" d="M 50 190 L 670 190" />
+
+    <!-- Labels -->
+    <text id="labelA" class="label hidden" x="55" y="60">Wave 1: sin(kx)</text>
+    <text id="labelB" class="label hidden" x="55" y="78">Wave 2: sin(kx + φ)</text>
+
+    <!-- Math box -->
+    <foreignObject id="mathBox" x="380" y="350" width="320" height="60" class="hidden">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="math">
+        y = y1 + y2 = 2A·cos(φ/2)·sin(kx − ωt + φ/2)<br/>
+        <span id="numbers">A=1, φ=90°, 2A·cos(φ/2)=√2</span>
+      </div>
+    </foreignObject>
+
+    <!-- Combine guide (appears on step 4 when toggled) -->
+    <g id="probe" class="hidden">
+      <line id="probeLine" class="probe-line" x1="50" y1="40" x2="50" y2="340" />
+      <line id="stackA" class="stack a" x1="50" y1="190" x2="50" y2="190" />
+      <line id="stackB" class="stack b" x1="50" y1="190" x2="50" y2="190" />
+      <circle id="pA" class="marker a" r="4" cx="50" cy="190" />
+      <circle id="pB" class="marker b" r="4" cx="50" cy="190" />
+      <circle id="pSum" class="marker sum" r="5" cx="50" cy="190" />
+      <text id="probeLabel" class="label" x="55" y="360">y = y1 + y2</text>
+    </g>
+  </svg>
+  <p id="hint" class="hint hidden">Tip: toggle “Show combine guide” to watch the vertical sum sweep across x.</p>
+</div>
+
+<script>
+// Ripple/diffraction effect on the button
+(function rippleEffect(){
+  const btn = document.getElementById('rippleBtn');
+  const host = btn.querySelector('.ripple');
+
+  function burst() {
+    // Create two phased fields (slightly offset centers) to hint at interference
+    const a = document.createElement('span'); a.className = 'field a';
+    const b = document.createElement('span'); b.className = 'field b';
+    host.appendChild(a); host.appendChild(b);
+    // Cleanup after animation (~1s)
+    const remove = el => el.addEventListener('animationend', () => el.remove(), { once: true });
+    remove(a); remove(b);
+  }
+
+  btn.addEventListener('click', burst);
+})();
+
+// Animated SVG chart for superposition
+(function chart(){
+  // Plot geometry
+  const x0 = 50, y0 = 40, W = 620, H = 300;
+  const cy = y0 + H/2; // vertical center
+  const N = 300; // samples
+
+  // Wave params (edit)
+  const A = 60;           // amplitude in px
+  const cycles = 2;       // how many cycles fit in width
+  const k = 2 * Math.PI * cycles / W; // spatial frequency per px
+  const omega = 1.6;      // angular speed (rad/s)
+  let phi = Math.PI / 2;  // phase offset between waves (rad)
+
+  // State
+  let t = 0; let raf = null; let step = 0;
+  let guideOn = false; let xProbe = x0;
+
+  // Elements
+  const grid = document.getElementById('grid');
+  const axes = document.getElementById('axes');
+  const waveA = document.getElementById('waveA');
+  const waveB = document.getElementById('waveB');
+  const waveSum = document.getElementById('waveSum');
+  const labelA = document.getElementById('labelA');
+  const labelB = document.getElementById('labelB');
+  const mathBox = document.getElementById('mathBox');
+  const numbers = document.getElementById('numbers');
+  const probe = document.getElementById('probe');
+  const probeLine = document.getElementById('probeLine');
+  const stackA = document.getElementById('stackA');
+  const stackB = document.getElementById('stackB');
+  const pA = document.getElementById('pA');
+  const pB = document.getElementById('pB');
+  const pSum = document.getElementById('pSum');
+  const hint = document.getElementById('hint');
+
+  const nextBtn = document.getElementById('next');
+  const resetBtn = document.getElementById('reset');
+  const stepLabel = document.getElementById('stepLabel');
+  const guideToggle = document.getElementById('guide');
+
+  function show(el){ el.classList.remove('hidden'); el.classList.add('reveal'); }
+  function hide(el){ el.classList.add('hidden'); el.classList.remove('reveal'); }
+
+  function updateStepLabel(){
+    const titles = ['Setup','Wave 1','Wave 2 (phase φ)','Sum and animation'];
+    stepLabel.textContent = `Step ${step}/4 — ${titles[Math.max(0, step-1)] || 'Setup'}`;
+  }
+
+  function wavePath(fn){
+    let d = '';
+    for(let i=0;i<=N;i++){
+      const x = x0 + (i/N)*W;
+      const u = (i/N) * (2*Math.PI*cycles); // phase along x
+      const y = cy - fn(u);
+      d += (i===0? 'M ':' L ') + x.toFixed(2) + ' ' + y.toFixed(2);
+    }
+    return d;
+  }
+
+  function setWavePaths(){
+    const y1 = (u) => A * Math.sin(u - omega*t);
+    const y2 = (u) => A * Math.sin(u - omega*t + phi);
+    const ys = (u) => y1(u) + y2(u);
+    waveA.setAttribute('d', wavePath(y1));
+    waveB.setAttribute('d', wavePath(y2));
+    waveSum.setAttribute('d', wavePath(ys));
+  }
+
+  function updateProbe(){
+    if(!guideOn || step < 4) { hide(probe); hide(hint); return; }
+    show(probe); show(hint);
+    // Sweep x
+    xProbe += 1.2; if (xProbe > x0 + W) xProbe = x0;
+    const u = (xProbe - x0) / W * (2*Math.PI*cycles);
+    const y1v = A * Math.sin(u - omega*t);
+    const y2v = A * Math.sin(u - omega*t + phi);
+    const ysv = y1v + y2v;
+    const y1 = cy - y1v, y2 = cy - y2v, ys = cy - ysv;
+    // Position probe visuals
+    probeLine.setAttribute('x1', xProbe); probeLine.setAttribute('x2', xProbe);
+    stackA.setAttribute('x1', xProbe); stackA.setAttribute('x2', xProbe);
+    stackB.setAttribute('x1', xProbe); stackB.setAttribute('x2', xProbe);
+    // Stack from baseline to y1 (red), then from y1 to sum (blue)
+    stackA.setAttribute('y1', cy); stackA.setAttribute('y2', y1);
+    stackB.setAttribute('y1', y1); stackB.setAttribute('y2', ys);
+    pA.setAttribute('cx', xProbe); pA.setAttribute('cy', y1);
+    pB.setAttribute('cx', xProbe); pB.setAttribute('cy', y2);
+    pSum.setAttribute('cx', xProbe); pSum.setAttribute('cy', ys);
+  }
+
+  function animate(){
+    t += 0.016; // ~60fps
+    setWavePaths();
+    updateProbe();
+    raf = requestAnimationFrame(animate);
+  }
+
+  function stop(){ if(raf) cancelAnimationFrame(raf); raf = null; }
+
+  function reset(){
+    stop(); t = 0; step = 0; phi = Math.PI/2; xProbe = x0; guideOn = false; guideToggle.checked = false;
+    [grid, axes, waveA, waveB, waveSum, labelA, labelB, mathBox, probe, hint].forEach(hide);
+    waveA.classList.remove('drawn');
+    waveB.classList.remove('drawn');
+    waveSum.classList.remove('drawn');
+    setWavePaths();
+    numbers.textContent = `A=1, φ=90°, 2A·cos(φ/2)=${(2*Math.cos(phi/2)).toFixed(2)}`;
+    nextBtn.disabled = false; updateStepLabel();
+  }
+
+  function step1(){ show(grid); show(axes); }
+  function step2(){ show(waveA); show(labelA); requestAnimationFrame(()=>waveA.classList.add('drawn')); }
+  function step3(){ show(waveB); show(labelB); requestAnimationFrame(()=>waveB.classList.add('drawn')); }
+  function step4(){
+    show(waveSum); show(mathBox);
+    requestAnimationFrame(()=>waveSum.classList.add('drawn'));
+    stop(); setWavePaths(); animate();
+  }
+
+  function next(){
+    step++; updateStepLabel();
+    if(step===1) step1();
+    else if(step===2) step2();
+    else if(step===3) step3();
+    else if(step===4) step4();
+    else nextBtn.disabled = true;
+  }
+
+  nextBtn.addEventListener('click', next);
+  resetBtn.addEventListener('click', reset);
+  guideToggle.addEventListener('change', (e)=>{ guideOn = e.target.checked; });
+
+  // Initialize
+  setWavePaths(); reset();
+})();
+</script>
