@@ -1,325 +1,357 @@
----
-title: "Wave Interference: Ripple + Superposition"
-category: "visuals"
-description: "Click-ripple diffraction effect and an animated SVG chart showing wave superposition."
----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wave Interference Button Demo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
 
-<style>
-  /* Layout helpers */
-  .center {
-    display: grid; place-items: center; min-height: 38vh; margin-bottom: 1rem;
-  }
-  .section-title { margin: .5rem 0; }
-  .muted { color: var(--muted, #6b7280); }
+        .wave-button {
+            position: relative;
+            padding: 20px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
 
-  /* Button + edge ripple effect */
-  .cta {
-    position: relative; overflow: hidden;
-    display: inline-flex; align-items: center; justify-content: center;
-    min-width: 160px; min-height: 56px; padding: .75rem 1.25rem;
-    border: 1px solid var(--border, #e5e7eb); border-radius: 999px;
-    background: #111827; color: #fff; font-weight: 600; letter-spacing: .3px;
-    cursor: pointer; user-select: none; box-shadow: 0 6px 20px rgba(0,0,0,.12);
-  }
-  .cta:active { transform: translateY(1px); }
-  .ripple { position: absolute; inset: 0; pointer-events: none; isolation: isolate; }
+        .wave-button:hover {
+            transform: translateY(-2px);
+        }
 
-  /* Edge ring overlay (SVG) */
-  .ring { position: absolute; inset: -3px; width: calc(100% + 6px); height: calc(100% + 6px); pointer-events: none; mix-blend-mode: screen; }
-  .ring .stroke { fill: none; stroke-linecap: round; vector-effect: non-scaling-stroke; stroke-width: 2.5; stroke-dasharray: 2 10; opacity: .9; filter: drop-shadow(0 0 6px rgba(59,130,246,.45)); animation: trace 900ms ease-out forwards; }
-  .ring .stroke.a { stroke: #3b82f6; }
-  .ring .stroke.b { stroke: #ef4444; animation-delay: 35ms; filter: drop-shadow(0 0 6px rgba(239,68,68,.40)); }
+        /* Wave elements that start from each end */
+        .wave-button::before,
+        .wave-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, transparent 70%);
+            opacity: 0;
+            pointer-events: none;
+        }
 
-  @keyframes trace {
-    0%   { stroke-dashoffset: 0;   opacity: .95; stroke-width: 2.5; }
-    55%  { stroke-dashoffset: -70; opacity: .75; stroke-width: 4; }
-    100% { stroke-dashoffset: -140; opacity: 0;  stroke-width: 1.25; }
-  }
+        .wave-button::before {
+            left: 0;
+            transform: translateX(-100%);
+        }
 
-  /* Chart styles */
-  .controls { display: flex; gap: .5rem; align-items: center; margin: .5rem 0 1rem; flex-wrap: wrap; }
-  .btn { appearance: none; border: 1px solid var(--border, #e5e7eb); padding: .5rem .75rem; border-radius: 6px; background: white; cursor: pointer; }
-  .btn-primary { background: #2563eb; color: white; border-color: #2563eb; }
-  .btn:disabled { opacity: .6; cursor: not-allowed; }
-  .legend { color: var(--muted, #6b7280); font-size: .9rem; margin-left: .25rem; }
-  .figure { width: 100%; max-width: 760px; margin: 0 auto; }
-  svg { width: 100%; height: auto; background: #ffffff; border: 1px solid var(--border, #e5e7eb); border-radius: 8px; }
-  .axis { stroke: #94a3b8; stroke-width: 1; }
-  .grid { stroke: #e5e7eb; stroke-width: 1; }
-  .wave { fill: none; stroke-width: 2.5; }
-  .wave.a { stroke: #ef4444; }
-  .wave.b { stroke: #3b82f6; }
-  .wave.sum { stroke: #10b981; stroke-width: 3; }
-  .hidden { opacity: 0; }
-  .reveal { opacity: 1; transition: opacity 0.5s ease; }
-  .dashdraw { stroke-dasharray: 1400; stroke-dashoffset: 1400; transition: stroke-dashoffset 0.9s ease; }
-  .dashdraw.drawn { stroke-dashoffset: 0; }
-  .label { font-size: 12px; fill: #374151; }
-  .math { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; background: #f8fafc; border: 1px solid var(--border, #e5e7eb); padding: .5rem .75rem; border-radius: 6px; display: inline-block; }
-  .probe-line { stroke: #111827; stroke-opacity: .2; stroke-width: 2; }
-  .marker { stroke: #fff; stroke-width: 1.5; }
-  .marker.a { fill: #ef4444; }
-  .marker.b { fill: #3b82f6; }
-  .marker.sum { fill: #10b981; }
-  .stack.a { stroke: #ef4444; stroke-width: 3; stroke-linecap: round; }
-  .stack.b { stroke: #3b82f6; stroke-width: 3; stroke-linecap: round; }
-  .hint { color: var(--muted, #6b7280); font-size: .85rem; }
-</style>
+        .wave-button::after {
+            right: 0;
+            transform: translateX(100%);
+        }
 
-<section class="center">
-  <button id="rippleBtn" class="cta" aria-label="Click to produce wave interference feedback">
-    Click Me
-    <!-- container for ephemeral ripples -->
-    <span class="ripple" aria-hidden="true"></span>
-  </button>
-</section>
-<p class="muted">A quick diffraction/interference ripple appears as responsive feedback when you click.</p>
+        /* Animation keyframes for wave interference */
+        @keyframes waveFromLeft {
+            0% {
+                opacity: 0;
+                transform: translateX(-100%) scale(0.5);
+            }
+            50% {
+                opacity: 1;
+                transform: translateX(0%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(50%) scale(1.5);
+            }
+        }
 
-<h2 class="section-title">Animated Chart: Wave Superposition</h2>
-<div class="controls">
-  <button id="next" class="btn btn-primary">Next step</button>
-  <button id="reset" class="btn">Reset</button>
-  <label style="display:flex;align-items:center;gap:.35rem;">
-    <input type="checkbox" id="guide" /> Show combine guide
-  </label>
-  <span id="stepLabel" class="legend">Step 0/4 — Setup</span>
-</div>
+        @keyframes waveFromRight {
+            0% {
+                opacity: 0;
+                transform: translateX(100%) scale(0.5);
+            }
+            50% {
+                opacity: 1;
+                transform: translateX(0%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(-50%) scale(1.5);
+            }
+        }
 
-<div class="figure">
-  <svg id="scene" viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Wave interference demo">
-    <!-- Plot area -->
-    <rect x="50" y="40" width="620" height="300" fill="#ffffff" />
+        /* Triggered animation class */
+        .wave-button.animating::before {
+            animation: waveFromLeft 1.5s ease-out;
+        }
 
-    <!-- Grid -->
-    <g id="grid" class="hidden">
-      <path class="grid" d="M50 190 H670"/>
-      <path class="grid" d="M50 100 H670"/>
-      <path class="grid" d="M50 280 H670"/>
-    </g>
+        .wave-button.animating::after {
+            animation: waveFromRight 1.5s ease-out;
+        }
 
-    <!-- Axes -->
-    <g id="axes" class="hidden">
-      <path class="axis" d="M50 190 H670"/>
-      <path class="axis" d="M50 40 V340"/>
-      <text class="label" x="675" y="195">x</text>
-      <text class="label" x="38" y="50">y</text>
-    </g>
+        /* Additional ripple effect for collision point */
+        .collision-ripple {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+            pointer-events: none;
+        }
 
-    <!-- Waves -->
-    <path id="waveA" class="wave a dashdraw hidden" d="M 50 190 L 670 190" />
-    <path id="waveB" class="wave b dashdraw hidden" d="M 50 190 L 670 190" />
-    <path id="waveSum" class="wave sum dashdraw hidden" d="M 50 190 L 670 190" />
+        .wave-button.animating .collision-ripple {
+            animation: collisionRipple 1.5s ease-out 0.75s;
+        }
 
-    <!-- Labels -->
-    <text id="labelA" class="label hidden" x="55" y="60">Wave 1: sin(kx)</text>
-    <text id="labelB" class="label hidden" x="55" y="78">Wave 2: sin(kx + φ)</text>
+        @keyframes collisionRipple {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0);
+            }
+            50% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(2);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(4);
+            }
+        }
 
-    <!-- Math box -->
-    <foreignObject id="mathBox" x="380" y="350" width="320" height="60" class="hidden">
-      <div xmlns="http://www.w3.org/1999/xhtml" class="math">
-        y = y1 + y2 = 2A·cos(φ/2)·sin(kx − ωt + φ/2)<br/>
-        <span id="numbers">A=1, φ=90°, 2A·cos(φ/2)=√2</span>
-      </div>
-    </foreignObject>
+        .demo-info {
+            margin-top: 40px;
+            text-align: center;
+            color: white;
+            max-width: 500px;
+        }
 
-    <!-- Combine guide (appears on step 4 when toggled) -->
-    <g id="probe" class="hidden">
-      <line id="probeLine" class="probe-line" x1="50" y1="40" x2="50" y2="340" />
-      <line id="stackA" class="stack a" x1="50" y1="190" x2="50" y2="190" />
-      <line id="stackB" class="stack b" x1="50" y1="190" x2="50" y2="190" />
-      <circle id="pA" class="marker a" r="4" cx="50" cy="190" />
-      <circle id="pB" class="marker b" r="4" cx="50" cy="190" />
-      <circle id="pSum" class="marker sum" r="5" cx="50" cy="190" />
-      <text id="probeLabel" class="label" x="55" y="360">y = y1 + y2</text>
-    </g>
-  </svg>
-  <p id="hint" class="hint hidden">Tip: toggle “Show combine guide” to watch the vertical sum sweep across x.</p>
-</div>
+        .demo-info h2 {
+            margin-bottom: 15px;
+        }
 
-<script>
-// Edge ripple along button border
-(function edgeRipple(){
-  const btn = document.getElementById('rippleBtn');
-  const host = btn.querySelector('.ripple');
+        .demo-info p {
+            line-height: 1.6;
+            opacity: 0.9;
+        }
 
-  // Rounded-rect path generator (pill for large radius)
-  function roundRectPath(x, y, w, h, r){
-    r = Math.max(0, Math.min(r, Math.min(w, h)/2));
-    const x2 = x + w, y2 = y + h;
-    return `M${x+r},${y} H${x2-r} A${r},${r} 0 0 1 ${x2},${y+r} V${y2-r} A${r},${r} 0 0 1 ${x2-r},${y2} H${x+r} A${r},${r} 0 0 1 ${x},${y2-r} V${y+r} A${r},${r} 0 0 1 ${x+r},${y} Z`;
-  }
+        /* Educational Chart Styles */
+        .chart-container {
+            margin-top: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 800px;
+            width: 100%;
+        }
 
-  function burst(){
-    const rect = btn.getBoundingClientRect();
-    const pad = 6; // matches CSS inset total (3px on each side)
-    const w = Math.round(rect.width + pad);
-    const h = Math.round(rect.height + pad);
+        .chart-title {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
 
-    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('class','ring');
-    svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
-    svg.setAttribute('width','100%');
-    svg.setAttribute('height','100%');
+        .wave-chart {
+            width: 100%;
+            height: 300px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
 
-    const innerPad = 3; // offset from edge so glow peeks outside
-    const rx = Math.min((h - innerPad*2)/2, 9999);
-    const d = roundRectPath(innerPad, innerPad, w - innerPad*2, h - innerPad*2, rx);
+        .wave-labels {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            color: white;
+            font-size: 14px;
+        }
 
-    const mk = (cls) => {
-      const p = document.createElementNS('http://www.w3.org/2000/svg','path');
-      p.setAttribute('class', `stroke ${cls}`);
-      p.setAttribute('d', d);
-      return p;
-    };
+        .phase-indicator {
+            text-align: center;
+            color: #4facfe;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 15px;
+            min-height: 25px;
+        }
+    </style>
+</head>
+<body>
+    <button class="wave-button" id="waveBtn">
+        Click Me
+        <div class="collision-ripple"></div>
+    </button>
 
-    const a = mk('a');
-    const b = mk('b');
-    svg.appendChild(a); svg.appendChild(b);
-    host.appendChild(svg);
+    <div class="demo-info">
+        <h2>Wave Interference Button</h2>
+        <p>
+            Click the button to see waves start from both edges and collide in the middle, 
+            creating an interference pattern. The animation demonstrates how waves can 
+            interact and create constructive interference at the collision point.
+        </p>
+    </div>
 
-    // Cleanup when animation completes
-    const done = () => svg.remove();
-    b.addEventListener('animationend', done, { once: true });
-  }
+    <div class="chart-container">
+        <h3 class="chart-title">Wave Interference Animation</h3>
+        <div class="phase-indicator" id="phaseIndicator">Phase 1: Wave 1 - sin(kx)</div>
+        <svg class="wave-chart" id="waveChart" viewBox="0 0 800 300">
+            <!-- Grid lines -->
+            <defs>
+                <pattern id="grid" width="40" height="30" patternUnits="userSpaceOnUse">
+                    <path d="M 40 0 L 0 0 0 30" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+            
+            <!-- Axis lines -->
+            <line x1="0" y1="150" x2="800" y2="150" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+            <line x1="400" y1="0" x2="400" y2="300" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            
+            <!-- Wave paths -->
+            <path id="wave1" d="" fill="none" stroke="#4facfe" stroke-width="3" opacity="0"/>
+            <path id="wave2" d="" fill="none" stroke="#00f2fe" stroke-width="3" opacity="0"/>
+            <path id="waveSum" d="" fill="none" stroke="#ffffff" stroke-width="4" opacity="0"/>
+        </svg>
+        
+        <div class="wave-labels">
+            <span>Wave 1: sin(kx)</span>
+            <span>Wave 2: sin(kx + π/2)</span>
+            <span>Superposition: Combined Waves</span>
+        </div>
+    </div>
 
-  btn.addEventListener('click', burst);
-})();
+    <script>
+        const waveButton = document.getElementById('waveBtn');
+        const phaseIndicator = document.getElementById('phaseIndicator');
+        const wave1 = document.getElementById('wave1');
+        const wave2 = document.getElementById('wave2');
+        const waveSum = document.getElementById('waveSum');
 
-// Animated SVG chart for superposition
-(function chart(){
-  // Plot geometry
-  const x0 = 50, y0 = 40, W = 620, H = 300;
-  const cy = y0 + H/2; // vertical center
-  const N = 300; // samples
+        // Button wave animation
+        waveButton.addEventListener('click', function() {
+            this.classList.remove('animating');
+            void this.offsetWidth;
+            this.classList.add('animating');
+            setTimeout(() => {
+                this.classList.remove('animating');
+            }, 1500);
+        });
 
-  // Wave params (edit)
-  const A = 60;           // amplitude in px
-  const cycles = 2;       // how many cycles fit in width
-  const k = 2 * Math.PI * cycles / W; // spatial frequency per px
-  const omega = 1.6;      // angular speed (rad/s)
-  let phi = Math.PI / 2;  // phase offset between waves (rad)
+        waveButton.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.click();
+            }
+        });
 
-  // State
-  let t = 0; let raf = null; let step = 0;
-  let guideOn = false; let xProbe = x0;
+        // Wave generation functions
+        function generateWave1(phase = 0) {
+            let path = 'M 0 150';
+            for (let x = 0; x <= 800; x += 4) {
+                const y = 150 + 60 * Math.sin((x * 0.02) + phase);
+                path += ` L ${x} ${y}`;
+            }
+            return path;
+        }
 
-  // Elements
-  const grid = document.getElementById('grid');
-  const axes = document.getElementById('axes');
-  const waveA = document.getElementById('waveA');
-  const waveB = document.getElementById('waveB');
-  const waveSum = document.getElementById('waveSum');
-  const labelA = document.getElementById('labelA');
-  const labelB = document.getElementById('labelB');
-  const mathBox = document.getElementById('mathBox');
-  const numbers = document.getElementById('numbers');
-  const probe = document.getElementById('probe');
-  const probeLine = document.getElementById('probeLine');
-  const stackA = document.getElementById('stackA');
-  const stackB = document.getElementById('stackB');
-  const pA = document.getElementById('pA');
-  const pB = document.getElementById('pB');
-  const pSum = document.getElementById('pSum');
-  const hint = document.getElementById('hint');
+        function generateWave2(phase = 0) {
+            let path = 'M 0 150';
+            for (let x = 0; x <= 800; x += 4) {
+                const y = 150 + 40 * Math.sin((x * 0.025) + Math.PI/2 + phase);
+                path += ` L ${x} ${y}`;
+            }
+            return path;
+        }
 
-  const nextBtn = document.getElementById('next');
-  const resetBtn = document.getElementById('reset');
-  const stepLabel = document.getElementById('stepLabel');
-  const guideToggle = document.getElementById('guide');
+        function generateSuperposition(phase = 0) {
+            let path = 'M 0 150';
+            for (let x = 0; x <= 800; x += 4) {
+                const wave1Val = 60 * Math.sin((x * 0.02) + phase);
+                const wave2Val = 40 * Math.sin((x * 0.025) + Math.PI/2 + phase);
+                const y = 150 + wave1Val + wave2Val;
+                path += ` L ${x} ${y}`;
+            }
+            return path;
+        }
 
-  function show(el){ el.classList.remove('hidden'); el.classList.add('reveal'); }
-  function hide(el){ el.classList.add('hidden'); el.classList.remove('reveal'); }
+        // Animation phases
+        const phases = [
+            {
+                name: "Phase 1: Wave 1 - sin(kx)",
+                action: () => {
+                    wave1.style.opacity = '1';
+                    wave2.style.opacity = '0';
+                    waveSum.style.opacity = '0';
+                }
+            },
+            {
+                name: "Phase 2: Wave 2 - sin(kx + π/2)",
+                action: () => {
+                    wave1.style.opacity = '0.3';
+                    wave2.style.opacity = '1';
+                    waveSum.style.opacity = '0';
+                }
+            },
+            {
+                name: "Phase 3: Superposition - Combined Waves",
+                action: () => {
+                    wave1.style.opacity = '0.4';
+                    wave2.style.opacity = '0.4';
+                    waveSum.style.opacity = '1';
+                }
+            },
+            {
+                name: "Phase 4: Interference Pattern",
+                action: () => {
+                    wave1.style.opacity = '0.2';
+                    wave2.style.opacity = '0.2';
+                    waveSum.style.opacity = '1';
+                }
+            }
+        ];
 
-  function updateStepLabel(){
-    const titles = ['Setup','Wave 1','Wave 2 (phase φ)','Sum and animation'];
-    stepLabel.textContent = `Step ${step}/4 — ${titles[Math.max(0, step-1)] || 'Setup'}`;
-  }
+        let currentPhase = 0;
+        let animationPhase = 0;
 
-  function wavePath(fn){
-    let d = '';
-    for(let i=0;i<=N;i++){
-      const x = x0 + (i/N)*W;
-      const u = (i/N) * (2*Math.PI*cycles); // phase along x
-      const y = cy - fn(u);
-      d += (i===0? 'M ':' L ') + x.toFixed(2) + ' ' + y.toFixed(2);
-    }
-    return d;
-  }
+        // Auto-animation loop
+        function animateWaves() {
+            // Update wave paths with animation phase
+            wave1.setAttribute('d', generateWave1(animationPhase));
+            wave2.setAttribute('d', generateWave2(animationPhase));
+            waveSum.setAttribute('d', generateSuperposition(animationPhase));
+            
+            animationPhase += 0.1;
+            requestAnimationFrame(animateWaves);
+        }
 
-  function setWavePaths(){
-    const y1 = (u) => A * Math.sin(u - omega*t);
-    const y2 = (u) => A * Math.sin(u - omega*t + phi);
-    const ys = (u) => y1(u) + y2(u);
-    waveA.setAttribute('d', wavePath(y1));
-    waveB.setAttribute('d', wavePath(y2));
-    waveSum.setAttribute('d', wavePath(ys));
-  }
+        // Phase cycling every 3 seconds
+        function cyclePhases() {
+            phaseIndicator.textContent = phases[currentPhase].name;
+            phases[currentPhase].action();
+            currentPhase = (currentPhase + 1) % phases.length;
+        }
 
-  function updateProbe(){
-    if(!guideOn || step < 4) { hide(probe); hide(hint); return; }
-    show(probe); show(hint);
-    // Sweep x
-    xProbe += 1.2; if (xProbe > x0 + W) xProbe = x0;
-    const u = (xProbe - x0) / W * (2*Math.PI*cycles);
-    const y1v = A * Math.sin(u - omega*t);
-    const y2v = A * Math.sin(u - omega*t + phi);
-    const ysv = y1v + y2v;
-    const y1 = cy - y1v, y2 = cy - y2v, ys = cy - ysv;
-    // Position probe visuals
-    probeLine.setAttribute('x1', xProbe); probeLine.setAttribute('x2', xProbe);
-    stackA.setAttribute('x1', xProbe); stackA.setAttribute('x2', xProbe);
-    stackB.setAttribute('x1', xProbe); stackB.setAttribute('x2', xProbe);
-    // Stack from baseline to y1 (red), then from y1 to sum (blue)
-    stackA.setAttribute('y1', cy); stackA.setAttribute('y2', y1);
-    stackB.setAttribute('y1', y1); stackB.setAttribute('y2', ys);
-    pA.setAttribute('cx', xProbe); pA.setAttribute('cy', y1);
-    pB.setAttribute('cx', xProbe); pB.setAttribute('cy', y2);
-    pSum.setAttribute('cx', xProbe); pSum.setAttribute('cy', ys);
-  }
-
-  function animate(){
-    t += 0.016; // ~60fps
-    setWavePaths();
-    updateProbe();
-    raf = requestAnimationFrame(animate);
-  }
-
-  function stop(){ if(raf) cancelAnimationFrame(raf); raf = null; }
-
-  function reset(){
-    stop(); t = 0; step = 0; phi = Math.PI/2; xProbe = x0; guideOn = false; guideToggle.checked = false;
-    [grid, axes, waveA, waveB, waveSum, labelA, labelB, mathBox, probe, hint].forEach(hide);
-    waveA.classList.remove('drawn');
-    waveB.classList.remove('drawn');
-    waveSum.classList.remove('drawn');
-    setWavePaths();
-    numbers.textContent = `A=1, φ=90°, 2A·cos(φ/2)=${(2*Math.cos(phi/2)).toFixed(2)}`;
-    nextBtn.disabled = false; updateStepLabel();
-  }
-
-  function step1(){ show(grid); show(axes); }
-  function step2(){ show(waveA); show(labelA); requestAnimationFrame(()=>waveA.classList.add('drawn')); }
-  function step3(){ show(waveB); show(labelB); requestAnimationFrame(()=>waveB.classList.add('drawn')); }
-  function step4(){
-    show(waveSum); show(mathBox);
-    requestAnimationFrame(()=>waveSum.classList.add('drawn'));
-    stop(); setWavePaths(); animate();
-  }
-
-  function next(){
-    step++; updateStepLabel();
-    if(step===1) step1();
-    else if(step===2) step2();
-    else if(step===3) step3();
-    else if(step===4) step4();
-    else nextBtn.disabled = true;
-  }
-
-  nextBtn.addEventListener('click', next);
-  resetBtn.addEventListener('click', reset);
-  guideToggle.addEventListener('change', (e)=>{ guideOn = e.target.checked; });
-
-  // Initialize
-  setWavePaths(); reset();
-})();
-</script>
+        // Start animations
+        animateWaves();
+        cyclePhases();
+        setInterval(cyclePhases, 3000);
+    </script>
+</body>
+</html>
