@@ -12,7 +12,7 @@ description: "Click-ripple diffraction effect and an animated SVG chart showing 
   .section-title { margin: .5rem 0; }
   .muted { color: var(--muted, #6b7280); }
 
-  /* Button + ripple effect */
+  /* Button + edge ripple effect */
   .cta {
     position: relative; overflow: hidden;
     display: inline-flex; align-items: center; justify-content: center;
@@ -22,29 +22,18 @@ description: "Click-ripple diffraction effect and an animated SVG chart showing 
     cursor: pointer; user-select: none; box-shadow: 0 6px 20px rgba(0,0,0,.12);
   }
   .cta:active { transform: translateY(1px); }
-  .ripple {
-    position: absolute; inset: 0; pointer-events: none; isolation: isolate;
-  }
-  /* Two phased fields that create a quick interference look */
-  .field {
-    position: absolute; width: 160vmax; height: 160vmax; left: 50%; top: 50%;
-    transform: translate(-50%, -50%) scale(.2); opacity: .45;
-    mix-blend-mode: screen; filter: blur(.3px);
-    background: repeating-radial-gradient(circle at var(--cx, 52%) var(--cy, 50%),
-                 rgba(59,130,246,.9) 0 2px, transparent 2px 8px);
-    border-radius: 50%;
-    animation: field-out .95s ease-out forwards;
-  }
-  .field.b {
-    opacity: .42; --cx: 48%; --cy: 50%;
-    background: repeating-radial-gradient(circle at var(--cx) var(--cy),
-                 rgba(239,68,68,.9) 0 2px, transparent 2px 8px);
-    animation-delay: 15ms;
-  }
-  @keyframes field-out {
-    0%   { transform: translate(-50%, -50%) scale(.2);   opacity: .5; }
-    60%  { transform: translate(-50%, -50%) scale(1.8);  opacity: .35; }
-    100% { transform: translate(-50%, -50%) scale(3.2);  opacity: 0; }
+  .ripple { position: absolute; inset: 0; pointer-events: none; isolation: isolate; }
+
+  /* Edge ring overlay (SVG) */
+  .ring { position: absolute; inset: -3px; width: calc(100% + 6px); height: calc(100% + 6px); pointer-events: none; mix-blend-mode: screen; }
+  .ring .stroke { fill: none; stroke-linecap: round; vector-effect: non-scaling-stroke; stroke-width: 2.5; stroke-dasharray: 2 10; opacity: .9; filter: drop-shadow(0 0 6px rgba(59,130,246,.45)); animation: trace 900ms ease-out forwards; }
+  .ring .stroke.a { stroke: #3b82f6; }
+  .ring .stroke.b { stroke: #ef4444; animation-delay: 35ms; filter: drop-shadow(0 0 6px rgba(239,68,68,.40)); }
+
+  @keyframes trace {
+    0%   { stroke-dashoffset: 0;   opacity: .95; stroke-width: 2.5; }
+    55%  { stroke-dashoffset: -70; opacity: .75; stroke-width: 4; }
+    100% { stroke-dashoffset: -140; opacity: 0;  stroke-width: 1.25; }
   }
 
   /* Chart styles */
@@ -148,19 +137,49 @@ description: "Click-ripple diffraction effect and an animated SVG chart showing 
 </div>
 
 <script>
-// Ripple/diffraction effect on the button
-(function rippleEffect(){
+// Edge ripple along button border
+(function edgeRipple(){
   const btn = document.getElementById('rippleBtn');
   const host = btn.querySelector('.ripple');
 
-  function burst() {
-    // Create two phased fields (slightly offset centers) to hint at interference
-    const a = document.createElement('span'); a.className = 'field a';
-    const b = document.createElement('span'); b.className = 'field b';
-    host.appendChild(a); host.appendChild(b);
-    // Cleanup after animation (~1s)
-    const remove = el => el.addEventListener('animationend', () => el.remove(), { once: true });
-    remove(a); remove(b);
+  // Rounded-rect path generator (pill for large radius)
+  function roundRectPath(x, y, w, h, r){
+    r = Math.max(0, Math.min(r, Math.min(w, h)/2));
+    const x2 = x + w, y2 = y + h;
+    return `M${x+r},${y} H${x2-r} A${r},${r} 0 0 1 ${x2},${y+r} V${y2-r} A${r},${r} 0 0 1 ${x2-r},${y2} H${x+r} A${r},${r} 0 0 1 ${x},${y2-r} V${y+r} A${r},${r} 0 0 1 ${x+r},${y} Z`;
+  }
+
+  function burst(){
+    const rect = btn.getBoundingClientRect();
+    const pad = 6; // matches CSS inset total (3px on each side)
+    const w = Math.round(rect.width + pad);
+    const h = Math.round(rect.height + pad);
+
+    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.setAttribute('class','ring');
+    svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+    svg.setAttribute('width','100%');
+    svg.setAttribute('height','100%');
+
+    const innerPad = 3; // offset from edge so glow peeks outside
+    const rx = Math.min((h - innerPad*2)/2, 9999);
+    const d = roundRectPath(innerPad, innerPad, w - innerPad*2, h - innerPad*2, rx);
+
+    const mk = (cls) => {
+      const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+      p.setAttribute('class', `stroke ${cls}`);
+      p.setAttribute('d', d);
+      return p;
+    };
+
+    const a = mk('a');
+    const b = mk('b');
+    svg.appendChild(a); svg.appendChild(b);
+    host.appendChild(svg);
+
+    // Cleanup when animation completes
+    const done = () => svg.remove();
+    b.addEventListener('animationend', done, { once: true });
   }
 
   btn.addEventListener('click', burst);
