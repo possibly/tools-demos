@@ -40,101 +40,26 @@ description: "Interactive button with wave collision effects and educational cha
             transform: translateY(-2px);
         }
 
-        /* Wave elements that start from each end */
-        .wave-button::before,
-        .wave-button::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            width: 50%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, transparent 70%);
-            opacity: 0;
-            pointer-events: none;
+
+        /* Border wobble animation for wave collision effect */
+        .wave-button.animating {
+            animation: borderWobble 1s ease-out;
         }
 
-        .wave-button::before {
-            left: 0;
-            transform: translateX(-100%);
+        @keyframes borderWobble {
+            0% { border-radius: 50px; }
+            10% { border-radius: 45px 55px 50px 50px; }
+            20% { border-radius: 55px 45px 55px 45px; }
+            30% { border-radius: 40px 60px 45px 55px; }
+            40% { border-radius: 60px 40px 55px 45px; }
+            50% { border-radius: 35px 65px 40px 60px; }
+            60% { border-radius: 65px 35px 60px 40px; }
+            70% { border-radius: 45px 55px 50px 50px; }
+            80% { border-radius: 55px 45px 55px 45px; }
+            90% { border-radius: 50px 50px 50px 50px; }
+            100% { border-radius: 50px; }
         }
 
-        .wave-button::after {
-            right: 0;
-            transform: translateX(100%);
-        }
-
-        /* Animation keyframes for wave interference */
-        @keyframes waveFromLeft {
-            0% {
-                opacity: 0;
-                transform: translateX(-100%) scale(0.5);
-            }
-            50% {
-                opacity: 1;
-                transform: translateX(0%) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateX(50%) scale(1.5);
-            }
-        }
-
-        @keyframes waveFromRight {
-            0% {
-                opacity: 0;
-                transform: translateX(100%) scale(0.5);
-            }
-            50% {
-                opacity: 1;
-                transform: translateX(0%) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateX(-50%) scale(1.5);
-            }
-        }
-
-        /* Triggered animation class */
-        .wave-button.animating::before {
-            animation: waveFromLeft 1.5s ease-out;
-        }
-
-        .wave-button.animating::after {
-            animation: waveFromRight 1.5s ease-out;
-        }
-
-        /* Additional ripple effect for collision point */
-        .collision-ripple {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
-            transform: translate(-50%, -50%) scale(0);
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .wave-button.animating .collision-ripple {
-            animation: collisionRipple 1.5s ease-out 0.75s;
-        }
-
-        @keyframes collisionRipple {
-            0% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(0);
-            }
-            50% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(2);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(4);
-            }
-        }
 
         .demo-info {
             margin-top: 40px;
@@ -201,21 +126,20 @@ description: "Interactive button with wave collision effects and educational cha
 <body>
     <button class="wave-button" id="waveBtn">
         Click Me
-        <div class="collision-ripple"></div>
     </button>
 
     <div class="demo-info">
-        <h2>Wave Interference Button</h2>
+        <h2>Border Wave Interference</h2>
         <p>
-            Click the button to see waves start from both edges and collide in the middle, 
-            creating an interference pattern. The animation demonstrates how waves can 
-            interact and create constructive interference at the collision point.
+            Click the button to see how wave interference affects the border shape. 
+            The wobbling border simulates waves colliding around the perimeter, 
+            creating dynamic deformation patterns similar to wave interference in physics.
         </p>
     </div>
 
     <div class="chart-container">
-        <h3 class="chart-title">Wave Interference Animation</h3>
-        <div class="phase-indicator" id="phaseIndicator">Phase 1: Wave 1 - sin(kx)</div>
+        <h3 class="chart-title">Border Deformation Animation</h3>
+        <div class="phase-indicator" id="phaseIndicator">Phase 1: Circular Wave - r(θ)</div>
         <svg class="wave-chart" id="waveChart" viewBox="0 0 800 300">
             <!-- Grid lines -->
             <defs>
@@ -225,29 +149,28 @@ description: "Interactive button with wave collision effects and educational cha
             </defs>
             <rect width="100%" height="100%" fill="url(#grid)" />
             
-            <!-- Axis lines -->
-            <line x1="0" y1="150" x2="800" y2="150" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
-            <line x1="400" y1="0" x2="400" y2="300" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+            <!-- Center point -->
+            <circle cx="400" cy="150" r="3" fill="rgba(255,255,255,0.5)"/>
             
-            <!-- Wave paths -->
-            <path id="wave1" d="" fill="none" stroke="#4facfe" stroke-width="3" opacity="0"/>
-            <path id="wave2" d="" fill="none" stroke="#00f2fe" stroke-width="3" opacity="0"/>
-            <path id="waveSum" d="" fill="none" stroke="#ffffff" stroke-width="4" opacity="0"/>
+            <!-- Border shapes -->
+            <ellipse id="border1" cx="400" cy="150" rx="80" ry="80" fill="none" stroke="#4facfe" stroke-width="3" opacity="0"/>
+            <ellipse id="border2" cx="400" cy="150" rx="80" ry="80" fill="none" stroke="#00f2fe" stroke-width="3" opacity="0"/>
+            <ellipse id="borderSum" cx="400" cy="150" rx="80" ry="80" fill="none" stroke="#ffffff" stroke-width="4" opacity="0"/>
         </svg>
         
         <div class="wave-labels">
-            <span>Wave 1: sin(kx)</span>
-            <span>Wave 2: sin(kx + π/2)</span>
-            <span>Superposition: Combined Waves</span>
+            <span>Wave 1: Radial Oscillation</span>
+            <span>Wave 2: Angular Perturbation</span>
+            <span>Interference: Combined Deformation</span>
         </div>
     </div>
 
     <script>
         const waveButton = document.getElementById('waveBtn');
         const phaseIndicator = document.getElementById('phaseIndicator');
-        const wave1 = document.getElementById('wave1');
-        const wave2 = document.getElementById('wave2');
-        const waveSum = document.getElementById('waveSum');
+        const border1 = document.getElementById('border1');
+        const border2 = document.getElementById('border2');
+        const borderSum = document.getElementById('borderSum');
 
         // Button wave animation
         waveButton.addEventListener('click', function() {
@@ -256,7 +179,7 @@ description: "Interactive button with wave collision effects and educational cha
             this.classList.add('animating');
             setTimeout(() => {
                 this.classList.remove('animating');
-            }, 1500);
+            }, 1000);
         });
 
         waveButton.addEventListener('keydown', function(e) {
@@ -266,68 +189,62 @@ description: "Interactive button with wave collision effects and educational cha
             }
         });
 
-        // Wave generation functions
-        function generateWave1(phase = 0) {
-            let path = 'M 0 150';
-            for (let x = 0; x <= 800; x += 4) {
-                const y = 150 + 60 * Math.sin((x * 0.02) + phase);
-                path += ` L ${x} ${y}`;
-            }
-            return path;
+        // Border deformation functions
+        function generateBorder1(phase = 0) {
+            const baseRadius = 80;
+            const radialVariation = 15 * Math.sin(phase);
+            return `${baseRadius + radialVariation}`;
         }
 
-        function generateWave2(phase = 0) {
-            let path = 'M 0 150';
-            for (let x = 0; x <= 800; x += 4) {
-                const y = 150 + 40 * Math.sin((x * 0.025) + Math.PI/2 + phase);
-                path += ` L ${x} ${y}`;
-            }
-            return path;
+        function generateBorder2(phase = 0) {
+            const baseRadius = 80;
+            const angularVariation = 20 * Math.sin(phase + Math.PI/3);
+            const rx = baseRadius + angularVariation;
+            const ry = baseRadius - angularVariation * 0.5;
+            return { rx, ry };
         }
 
-        function generateSuperposition(phase = 0) {
-            let path = 'M 0 150';
-            for (let x = 0; x <= 800; x += 4) {
-                const wave1Val = 60 * Math.sin((x * 0.02) + phase);
-                const wave2Val = 40 * Math.sin((x * 0.025) + Math.PI/2 + phase);
-                const y = 150 + wave1Val + wave2Val;
-                path += ` L ${x} ${y}`;
-            }
-            return path;
+        function generateBorderSum(phase = 0) {
+            const baseRadius = 80;
+            const radialVar = 15 * Math.sin(phase);
+            const angularVar = 20 * Math.sin(phase + Math.PI/3);
+            const rx = baseRadius + radialVar + angularVar * 0.7;
+            const ry = baseRadius + radialVar - angularVar * 0.3;
+            return { rx, ry };
         }
 
         // Animation phases
         const phases = [
             {
-                name: "Phase 1: Wave 1 - sin(kx)",
+                name: "Phase 1: Circular Wave - r(θ)",
                 action: () => {
-                    wave1.style.opacity = '1';
-                    wave2.style.opacity = '0';
-                    waveSum.style.opacity = '0';
+                    border1.style.opacity = '1';
+                    border2.style.opacity = '0';
+                    borderSum.style.opacity = '0';
                 }
             },
             {
-                name: "Phase 2: Wave 2 - sin(kx + π/2)",
+                name: "Phase 2: Angular Perturbation - θ(t)",
                 action: () => {
-                    wave1.style.opacity = '0.3';
-                    wave2.style.opacity = '1';
-                    waveSum.style.opacity = '0';
+                    border1.style.opacity = '0.3';
+                    border2.style.opacity = '1';
+                    borderSum.style.opacity = '0';
                 }
             },
             {
-                name: "Phase 3: Superposition - Combined Waves",
+                name: "Phase 3: Combined Deformation",
                 action: () => {
-                    wave1.style.opacity = '0.4';
-                    wave2.style.opacity = '0.4';
-                    waveSum.style.opacity = '1';
+                    border1.style.opacity = '0.4';
+                    border2.style.opacity = '0.4';
+                    borderSum.style.opacity = '1';
                 }
             },
             {
                 name: "Phase 4: Interference Pattern",
                 action: () => {
-                    wave1.style.opacity = '0.2';
-                    wave2.style.opacity = '0.2';
-                    waveSum.style.opacity = '1';
+                    border1.style.opacity = '0.2';
+                    border2.style.opacity = '0.2';
+                    borderSum.style.opacity = '1';
                 }
             }
         ];
@@ -336,14 +253,22 @@ description: "Interactive button with wave collision effects and educational cha
         let animationPhase = 0;
 
         // Auto-animation loop
-        function animateWaves() {
-            // Update wave paths with animation phase
-            wave1.setAttribute('d', generateWave1(animationPhase));
-            wave2.setAttribute('d', generateWave2(animationPhase));
-            waveSum.setAttribute('d', generateSuperposition(animationPhase));
+        function animateBorders() {
+            // Update border deformations
+            const r1 = generateBorder1(animationPhase);
+            border1.setAttribute('rx', r1);
+            border1.setAttribute('ry', r1);
             
-            animationPhase += 0.1;
-            requestAnimationFrame(animateWaves);
+            const { rx: r2x, ry: r2y } = generateBorder2(animationPhase);
+            border2.setAttribute('rx', r2x);
+            border2.setAttribute('ry', r2y);
+            
+            const { rx: rSumX, ry: rSumY } = generateBorderSum(animationPhase);
+            borderSum.setAttribute('rx', rSumX);
+            borderSum.setAttribute('ry', rSumY);
+            
+            animationPhase += 0.05;
+            requestAnimationFrame(animateBorders);
         }
 
         // Phase cycling every 3 seconds
@@ -354,7 +279,7 @@ description: "Interactive button with wave collision effects and educational cha
         }
 
         // Start animations
-        animateWaves();
+        animateBorders();
         cyclePhases();
         setInterval(cyclePhases, 3000);
     </script>
